@@ -33,45 +33,40 @@ DETECT ──▶ ROOT_CAUSE ──▶ STRATEGY ──▶ OUTREACH ──▶ TRAC
   recovery action, with a guardrail: any case above ₹50,000 is always
   escalated to a human, never fully automated.
 - **OUTREACH** — generates the recovery message in the customer's language
-  (English, Hindi, or Telugu) via templates (works fully offline) — see
-  "Plugging in Groq" below to layer in live LLM personalization for the
-  demo video.
-- **TRACK** — records the outcome (in this prototype, simulated response
-  probabilities per action type — see "What's simulated" below).
+  (English, Hindi, or Telugu) via templates. Runs fully offline; see
+  "Extending with live LLM personalization" below for an optional upgrade.
+- **TRACK** — records the outcome. In this prototype, response probabilities
+  are simulated per action type (see "What's simulated" below).
 - **STOP / LOOP** — the guardrail node. Caps automated attempts at 3 per
-  case, then hands off to a human. This is what makes "one failure handled
-  gracefully" concrete: a customer is never contacted indefinitely by the
-  agent.
+  case, then hands off to a human, so a customer is never contacted
+  indefinitely by the agent.
 
 Every node writes a structured entry to the case's `audit_trail`, viewable
 per-case in the dashboard.
 
-This is implemented as a plain, dependency-light state graph so the whole
-thing runs with zero external services — but the node/state shape maps 1:1
-onto a `langgraph.StateGraph` if you want to swap it in (each function
-already takes and returns the shared `case` state dict).
+The pipeline is implemented as a plain, dependency-light state graph so the
+whole thing runs with zero external services. The node/state shape maps
+1:1 onto a `langgraph.StateGraph` — each function already takes and returns
+the shared `case` state dict, so swapping in a real LangGraph is a
+mechanical change.
 
-## What's simulated (be upfront about this in your pitch)
+## What's simulated
 
 - The synthetic batch (`backend/data_gen.py`) stands in for real Razorpay
-  test-mode webhook data — swap in real test-mode API calls there.
+  test-mode webhook data.
 - Customer responses in `TRACK` are sampled from a probability per action
-  type, not real webhook callbacks — in production, `track()` would read a
+  type, not real webhook callbacks. In production, `track()` would read a
   real payment-status or delivery-receipt event instead.
 - Outreach is template-based by default (no API key required to run).
-
-Being explicit about what's simulated vs. real is a strength, not a
-weakness — the rubric asks for "honest metrics," not a black box.
 
 ## Metrics the dashboard shows
 
 - Total at-risk revenue vs. total recovered (₹), on a fresh 80-record
-  held-out batch every run
+  batch every run
 - Recovery rate %
-- Recovery rate broken down **by root cause** (shows the diagnosis step is
-  doing real work, not just noise)
-- Cases escalated to a human (the guardrail firing, not a failure)
-- Full per-case audit trail + the exact multilingual messages sent
+- Recovery rate broken down **by root cause**
+- Cases escalated to a human
+- Full per-case audit trail and the exact multilingual messages sent
 
 ## Running it
 
@@ -87,19 +82,18 @@ Open **http://127.0.0.1:8000** and click **"Run batch (80 records)"**.
 Click any row in the case ledger to see its full audit trail and the exact
 messages sent.
 
-## Plugging in Groq for the demo video (optional, makes it more impressive)
+## Extending with live LLM personalization (optional)
 
-Right now `backend/templates.py` uses fixed templates so the whole thing
-runs offline. To layer in live LLM personalization for your pitch video:
+`backend/templates.py` uses fixed templates so the pipeline runs offline
+by default. To layer in live LLM personalization:
 
 1. `pip install groq`
 2. Set `GROQ_API_KEY` in your environment.
-3. In `backend/pipeline.py`'s `outreach()` function, after building `msg`
-   from the template, pass it through a Groq call asking the model to
-   lightly personalize tone/wording while keeping the amount, action, and
-   language fixed — that keeps the *decision* rule-based and explainable
-   (required by the "explainable, bounded" bar) while the *wording* gets
-   LLM polish.
+3. In `backend/pipeline.py`'s `outreach()` function, pass the templated
+   `msg` through a Groq call that lightly personalizes tone/wording while
+   keeping the amount, action, and language fixed. This keeps the
+   *decision* rule-based and explainable while the *wording* gets LLM
+   polish.
 
 ## Plugging in real Razorpay test-mode data
 
@@ -108,22 +102,6 @@ Razorpay's test-mode Payments/Subscriptions APIs, filtering for
 `failed` / `pending` states. The rest of the pipeline needs no changes —
 `run_case()` only expects `id`, `type`, `amount`, `decline_code`,
 `customer_name`, `customer_language`.
-
-## For the pitch (5-minute video)
-
-1. **Problem** (30s): revenue loss is rarely one clean failure — show 2–3
-   different root causes side by side.
-2. **Live demo** (2 min): click "Run batch," show the summary numbers, open
-   2 cases — one that recovered, one that hit the attempt cap and
-   escalated (your "failure handled gracefully" example).
-3. **Architecture** (1 min): walk the DETECT→...→STOP diagram, emphasize
-   the guardrails (max attempts, high-value escalation).
-4. **Honesty** (1 min): explicitly state what's simulated vs. real, and
-   what you'd swap in for production (real webhooks, real Groq calls,
-   real Razorpay test-mode data).
-5. **Why it matters** (30s): tie back to the track's framing — this closes
-   the loop from detection to diagnosis to recovery, not just one piece
-   of it.
 
 ## Project structure
 
@@ -138,3 +116,6 @@ recovery-copilot/
     index.html       dashboard (single file, no build step)
   requirements.txt
 ```
+
+---
+Built by Trisha Kanderi for the Razorpay AI Buildathon (Track 03).
