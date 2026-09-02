@@ -82,7 +82,7 @@ Open **http://127.0.0.1:8000** and click **"Run batch (80 records)"**.
 Click any row in the case ledger to see its full audit trail and the exact
 messages sent.
 
-## Extending with live LLM personalization (optional)
+## Extending with live LLM personalization 
 
 `backend/templates.py` uses fixed templates so the pipeline runs offline
 by default. To layer in live LLM personalization:
