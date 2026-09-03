@@ -22,6 +22,7 @@ import random
 from datetime import datetime, timedelta
 
 from .templates import render_message
+from .data_gen import NAME_TRANSLIT
 
 random.seed(7)
 
@@ -93,7 +94,11 @@ def strategy(case):
 
 
 def outreach(case):
-    msg = render_message(case["action"], case["customer_language"], case["customer_name"], case["amount"])
+    # Use a native-script name inside non-English messages so the whole
+    # message is genuinely localized, not just the surrounding sentence.
+    lang = case["customer_language"]
+    display_name = NAME_TRANSLIT.get(case["customer_name"], {}).get(lang, case["customer_name"])
+    msg = render_message(case["action"], lang, display_name, case["amount"])
     case.setdefault("messages_sent", []).append(msg)
     _log(case, "OUTREACH", f"Sent '{case['action']}' message in '{case['customer_language']}'.")
     return case

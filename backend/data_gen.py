@@ -17,6 +17,33 @@ FIRST_NAMES = [
     "Manoj", "Swathi", "Ganesh", "Nisha",
 ]
 
+# Native-script transliteration so outreach messages are fully localized —
+# the Latin name is kept as customer_name (used in the dashboard/ledger,
+# which is language-neutral), while these are used inside the actual
+# Hindi/Telugu message text.
+NAME_TRANSLIT = {
+    "Arjun":   {"hi": "अर्जुन",  "te": "అర్జున్"},
+    "Priya":   {"hi": "प्रिया",  "te": "ప్రియ"},
+    "Rohit":   {"hi": "रोहित",   "te": "రోహిత్"},
+    "Sneha":   {"hi": "स्नेहा",  "te": "స్నేహ"},
+    "Karthik": {"hi": "कार्तिक", "te": "కార్తీక్"},
+    "Divya":   {"hi": "दिव्या",  "te": "దివ్య"},
+    "Vikram":  {"hi": "विक्रम",  "te": "విక్రమ్"},
+    "Anjali":  {"hi": "अंजलि",   "te": "అంజలి"},
+    "Suresh":  {"hi": "सुरेश",   "te": "సురేష్"},
+    "Meera":   {"hi": "मीरा",    "te": "మీర"},
+    "Rahul":   {"hi": "राहुल",   "te": "రాహుల్"},
+    "Pooja":   {"hi": "पूजा",    "te": "పూజ"},
+    "Naveen":  {"hi": "नवीन",    "te": "నవీన్"},
+    "Lakshmi": {"hi": "लक्ष्मी", "te": "లక్ష్మి"},
+    "Aditya":  {"hi": "आदित्य",  "te": "ఆదిత్య"},
+    "Kavya":   {"hi": "काव्या",  "te": "కావ్య"},
+    "Manoj":   {"hi": "मनोज",    "te": "మనోజ్"},
+    "Swathi":  {"hi": "स्वाति",  "te": "స్వాతి"},
+    "Ganesh":  {"hi": "गणेश",    "te": "గణేష్"},
+    "Nisha":   {"hi": "निशा",    "te": "నిషా"},
+}
+
 LANGUAGES = ["en", "hi", "te"]
 
 DECLINE_CODES = {
